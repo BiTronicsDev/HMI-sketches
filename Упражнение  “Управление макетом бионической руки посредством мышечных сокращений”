@@ -1,0 +1,121 @@
+#include <Servo.h> // Подключаем библиотеку для управления сервоприводами
+// Ниже определим углы поворота для сервопривода
+// Используем define, чтобы установить постоянное значение
+#define MAX_THUMB1 160 // большой палец (MG90S) (пин 10) открыт
+#define MIN_THUMB1 80 // большой палец (MG90S) (пин 10) закрыт 
+#define MAX_THUMB2 180 // большой палец (MG995) (пин 9) открыт
+#define MIN_THUMB2 30 // большой палец (MG995) (пин 9) закрыт
+#define MAX_INDEX_FINGER 140 // указательный палец (пин 6) закрыт
+#define MIN_INDEX_FINGER 0 // указательный палец (пин 6) открыт
+#define MAX_MIDDLE_FINGER 180 // средний палец (пин 5) закрыт
+#define MIN_MIDDLE_FINGER 0 // средний палец (пин 5) открыт
+#define MAX_LITTLE_RING_FINGER 180 // Безымянный палец и мизинец (пин 3) открыт
+#define MIN_LITTLE_RING_FINGER 0 // Безымянный палец и мизинец (пин 3) зарыт
+
+// Инициализируем объекты класса Servo
+Servo servo_thumb1; // MG90S (маленький сервопривод)
+Servo servo_thumb2; // MG995 (большой сервопривод)
+Servo servo_index_finger;
+Servo servo_middle_finger;
+Servo servo_little_ring_finfers;
+
+int a2; // Целочисленная переменная для записи данных с порта A2
+int a3; // Целочисленная переменная для записи данных с порта A3
+int pos = 0; // Начальная позиция
+int treshold = 150; //Значение порога, подбираем экспериментально
+bool A = false; //Переменная типа bool,которая будет принимать значение true, 
+// если a2 больше порога
+bool B = false; //Переменная типа bool,которая будет принимать значение true,
+// если a3 больше порога
+
+// Ниже пропишем функции для вращения 
+// сервоприводов под определенный жест
+// Жест кулак
+void ServoClosed() {
+    servo_thumb1.write(MIN_THUMB1);
+    servo_thumb2.write(MIN_THUMB2);
+    servo_index_finger.write(MAX_INDEX_FINGER);
+    servo_middle_finger.write(MAX_MIDDLE_FINGER);
+    servo_little_ring_finfers.write(MIN_LITTLE_RING_FINGER);
+}
+
+// Жест ладонь
+void ServoOpen() {
+    servo_thumb1.write(MAX_THUMB1);
+    servo_thumb2.write(MAX_THUMB2);
+    servo_index_finger.write(MIN_INDEX_FINGER);
+    servo_middle_finger.write(MIN_MIDDLE_FINGER);
+    servo_little_ring_finfers.write(MAX_LITTLE_RING_FINGER);
+}
+
+// Жест победа
+void ServoV() {
+    servo_thumb1.write(MIN_THUMB1);
+    servo_thumb2.write(MIN_THUMB2);
+    servo_index_finger.write(MIN_INDEX_FINGER);
+    servo_middle_finger.write(MIN_MIDDLE_FINGER);
+    servo_little_ring_finfers.write(MIN_LITTLE_RING_FINGER);
+}
+
+// Жест Ok
+void ServoOk() {
+    servo_thumb1.write(MIN_THUMB1);
+    servo_thumb2.write(MIN_THUMB2);
+    servo_index_finger.write(MAX_INDEX_FINGER);
+    servo_middle_finger.write(MIN_MIDDLE_FINGER);
+    servo_little_ring_finfers.write(MAX_LITTLE_RING_FINGER);
+}
+
+// Данная функция будет возвращать переменную pos со значением позиции
+int calc(int a, int b) // На вход принимает 2 целочисленных значения 
+// ( Значения с датчиков на A2 и A3)
+{
+    if (a >= treshold) { // Сравниваем a с порогом, 
+      A = true; // если порог пройден то переменной A присваивается значение true
+    }
+    else if (a < treshold) { // Иначе false
+        A = false;
+    }
+    if (b >= treshold) { // Сравниваем b с порогом,
+        B = true; //  если порог пройден то переменной B присваивается значение true
+    }
+    else if (b < treshold) {  // Иначе false
+        B = false;
+    }
+    if (A == false and B == false) pos = 0; // В зависимости от переменных A и B 
+    else if (A == true and B == false) pos = 1; // присваиваем переменной pos значение, 
+    else if (A == false and B == true) pos = 2; // которое характеризует позицию
+    else if (A == true and B == true) pos = 3;
+    return pos; // функция возвращает значение позиции
+}
+
+void setup() {
+    Serial.begin(9600);
+    // Инициализируем сервоприводы на пинах
+    servo_thumb1.attach(10);
+    servo_thumb2.attach(9);
+    servo_index_finger.attach(6);
+    servo_middle_finger.attach(5);
+    servo_little_ring_finfers.attach(3);
+}
+
+void loop() {
+    a2 = analogRead(A2); // Считываем значения с пина A2
+    a3 = analogRead(A3); // Считываем значения с пина A3      
+    int posLoop = calc(a2, a3); // Вызываем функцию для определения позиции
+    switch (posLoop) { // Используем условный оператор switch
+    case 0: // если значение позиции 0, то жест ладонь и т.д.
+        ServoOpen();
+        break;
+    case 1:
+        ServoOk();
+        break;
+    case 2:
+        ServoV();
+        break;
+    case 3:
+        ServoClosed();
+        break;
+    }
+    delay(4);
+}
