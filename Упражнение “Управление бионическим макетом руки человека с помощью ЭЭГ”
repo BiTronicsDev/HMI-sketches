@@ -1,0 +1,64 @@
+#include <Servo.h> // Подключаем библиотеку для управления сервоприводами
+// Ниже определим углы поворота для сервопривода
+#define MAX_THUMB1 160 // большой палец (MG90S) (пин 10) открыт
+#define MIN_THUMB1 80 // большой палец (MG90S) (пин 10) закрыт 
+#define MAX_THUMB2 180 // большой палец (MG995) (пин 9) открыт
+#define MIN_THUMB2 30 // большой палец (MG995) (пин 9) закрыт
+#define MAX_INDEX_FINGER 140 // указательный палец (пин 6) закрыт
+#define MIN_INDEX_FINGER 0 // указательный палец (пин 6) открыт
+#define MAX_MIDDLE_FINGER 180 // средний палец (пин 5) закрыт
+#define MIN_MIDDLE_FINGER 0 // средний палец (пин 5) открыт
+#define MAX_LITTLE_RING_FINGER 180 // Безымянный палец и мизинец (пин 3) открыт
+#define MIN_LITTLE_RING_FINGER 0 // Безымянный палец и мизинец (пин 3) закрыт
+
+// Инициализируем объекты класса Servo
+Servo servo_thumb1; // MG90S (маленький сервопривод)
+Servo servo_thumb2; // MG995 (большой сервопривод)
+Servo servo_index_finger;
+Servo servo_middle_finger;
+Servo servo_little_ring_finfers;
+
+int a2; // Целочисленная переменная 
+// для записи данных с пина A2
+int treshold1 = 180; // Значение порога
+
+// Ниже пропишем функции для вращения сервоприводов 
+// под определенный жест
+// Жест кулак
+void ServoClosed() {
+    servo_thumb1.write(MIN_THUMB1);
+    servo_thumb2.write(MIN_THUMB2);
+    servo_index_finger.write(MAX_INDEX_FINGER);
+    servo_middle_finger.write(MAX_MIDDLE_FINGER);
+    servo_little_ring_finfers.write(MIN_LITTLE_RING_FINGER);
+}
+
+// Жест ладонь
+void ServoOpen() {
+    servo_thumb1.write(MAX_THUMB1);
+    servo_thumb2.write(MAX_THUMB2);
+    servo_index_finger.write(MIN_INDEX_FINGER);
+    servo_middle_finger.write(MIN_MIDDLE_FINGER);
+    servo_little_ring_finfers.write(MAX_LITTLE_RING_FINGER);
+}
+
+void setup() {
+    Serial.begin(9600);
+    // Инициализируем сервоприводы на пинах
+    servo_thumb1.attach(10);
+    servo_thumb2.attach(9);
+    servo_index_finger.attach(6);
+    servo_middle_finger.attach(5);
+    servo_little_ring_finfers.attach(3);
+}
+
+void loop() {
+    a2 = analogRead(A2); // Считываем значения с пина A2
+    if (a2 > treshold1) { // Если значение амплитуды Альфа-ритма больше порога
+        ServoClosed();  // То вызываем функцию для жеста кулак
+    }
+    else { 
+        ServoOpen(); // иначе вызываем функцию для жеста ладонь
+    }
+    delay(10);
+}
