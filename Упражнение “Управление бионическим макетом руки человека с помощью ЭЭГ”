@@ -52,7 +52,7 @@ void setup() {
     servo_little_ring_finfers.attach(3);
 }
 
-void loop() {
+void loop() { 
     a2 = analogRead(A2); // Считываем значения с пина A2
     if (a2 > treshold1) { // Если значение амплитуды Альфа-ритма больше порога
         ServoClosed();  // То вызываем функцию для жеста кулак
