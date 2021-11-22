@@ -2,8 +2,8 @@
 
 // Установка порогов срабатывания
 // Диапазон значений порогов: 0..1023
-int threshold_1;
-int threshold_2;
+int threshold_1 = 250;
+int threshold_2 = 250;
 
 // Порты управления моторами
 int speed_pin_1 = 5;
@@ -12,13 +12,13 @@ int speed_pin_2 = 6;
 int direct1_pin = 4;
 int direct2_pin = 7;
 //Порты светодиодов
-int Led1_pin = 8;
-int Led2_pin = 9;
+int Led1_pin = 9;
+int Led2_pin = 8;
 // Аналоговые входы Arduino, на которые поступает сигнал
 int CHANNEL_1 = A2; // EMG
 int CHANNEL_2 = A3; // EMG
-int CHANNEL_3 = A4; // Потенциометр
-int CHANNEL_4 = A5; // Потенциометр
+int CHANNEL_3 = A5; // Потенциометр
+int CHANNEL_4 = A4; // Потенциометр
 // Инициализация переменных для хранения значения сигнала
 int value_1 = 0;
 int value_2 = 0;
@@ -30,61 +30,61 @@ Battery_Shield pwrBank;
 
 void setup()
 {
-	// Инициализация портов ввода/вывода
-	pinMode(CHANNEL_1, INPUT);
-	pinMode(CHANNEL_2, INPUT);
-	pinMode(CHANNEL_3, INPUT);
-	pinMode(CHANNEL_4, INPUT);
-	pinMode(speed_pin_1, OUTPUT);
-	pinMode(speed_pin_2, OUTPUT);
-	pinMode(direct1_pin, OUTPUT);
-	pinMode(direct2_pin, OUTPUT);
-	pinMode(Led1_pin, OUTPUT);
-	pinMode(Led2_pin, OUTPUT);
-	// Выбор направлений вращения моторов
-	digitalWrite(direct2_pin, LOW);
-	digitalWrite(direct1_pin, LOW);
-	// Задание нулевого начального управляющего сигнала
-	digitalWrite(speed_pin_1, 0);
-	digitalWrite(speed_pin_2, 0);
-	// Инициализация Battery_shield при помощи шины I2C
-	// Если battery_shield находится без нагрузки (ток на выходе ниже 120 мА)
-	// дольше 32 секунд, то он автоматически выключится. Для отключения этой
-	// функции необходимо переключатель "ДАННЫЕ" на нижней стороне 
+  // Инициализация портов ввода/вывода
+  pinMode(CHANNEL_1, INPUT);
+  pinMode(CHANNEL_2, INPUT);
+  pinMode(CHANNEL_3, INPUT);
+  pinMode(CHANNEL_4, INPUT);
+  pinMode(speed_pin_1, OUTPUT);
+  pinMode(speed_pin_2, OUTPUT);
+  pinMode(direct1_pin, OUTPUT);
+  pinMode(direct2_pin, OUTPUT);
+  pinMode(Led1_pin, OUTPUT);
+  pinMode(Led2_pin, OUTPUT);
+  // Выбор направлений вращения моторов
+  digitalWrite(direct2_pin, LOW);
+  digitalWrite(direct1_pin, LOW);
+  // Задание нулевого начального управляющего сигнала
+  digitalWrite(speed_pin_1, 0);
+  digitalWrite(speed_pin_2, 0);
+  // Инициализация Battery_shield при помощи шины I2C
+  // Если battery_shield находится без нагрузки (ток на выходе ниже 120 мА)
+  // дольше 32 секунд, то он автоматически выключится. Для отключения этой
+  // функции необходимо переключатель "ДАННЫЕ" на нижней стороне 
  //  battery_shield
-	// поместить в положение "I2C" и добавить инициализацию battery_shield:
-	pwrBank.begin(0.0128f);
+  // поместить в положение "I2C" и добавить инициализацию battery_shield:
+  pwrBank.begin(0.0128f);
 }
 
 void loop()
 {
-	// Считывание сигнала с четырех каналов
-	// value_1, value_2, treshold_1, treshold_2 лежат в диапазоне 0..1023
-	value_1 = analogRead(CHANNEL_1);
-	value_2 = analogRead(CHANNEL_2);
-	threshold_1 = analogRead(CHANNEL_3);
-	threshold_2 = analogRead(CHANNEL_4);
-	// Сравнение значения EMG-сигнала с порогом.
-	// В случае превышения порога моторы вращаются с 
-	// максимальной скоростью, светодиоды загораются.
-	// В ином случае моторы покоятся, светодиоды не горят
-	if (value_1 > threshold_1) {
-		speed_value_1 = 255;
-		digitalWrite(Led1_pin, HIGH);
-	}
-	else {
-		speed_value_1 = 0;
-		digitalWrite(Led1_pin, LOW);
-	}
-	if (value_2 > threshold_2) {
-		speed_value_2 = 255;
-		digitalWrite(Led2_pin, HIGH);
-	}
-	else {
-		speed_value_2 = 0;
-		digitalWrite(Led2_pin, LOW);
-	}
-	analogWrite(speed_pin_1, speed_value_1);
-	analogWrite(speed_pin_2, speed_value_2);
-	delay(20);
+  // Считывание сигнала с четырех каналов
+  // value_1, value_2, treshold_1, treshold_2 лежат в диапазоне 0..1023
+  value_1 = analogRead(CHANNEL_1);
+  value_2 = analogRead(CHANNEL_2);
+  threshold_1 = analogRead(CHANNEL_3);
+  threshold_2 = analogRead(CHANNEL_4);
+  // Сравнение значения EMG-сигнала с порогом.
+  // В случае превышения порога моторы вращаются с 
+  // максимальной скоростью, светодиоды загораются.
+  // В ином случае моторы покоятся, светодиоды не горят
+  if (value_1 > threshold_1) {
+    speed_value_1 = 255;
+    digitalWrite(Led1_pin, HIGH);
+  }
+  else {
+    speed_value_1 = 0;
+    digitalWrite(Led1_pin, LOW);
+  }
+  if (value_2 > threshold_2) {
+    speed_value_2 = 255;
+    digitalWrite(Led2_pin, HIGH);
+  }
+  else {
+    speed_value_2 = 0;
+    digitalWrite(Led2_pin, LOW);
+  }
+  analogWrite(speed_pin_1, speed_value_1);
+  analogWrite(speed_pin_2, speed_value_2);
+  delay(20);
 }
